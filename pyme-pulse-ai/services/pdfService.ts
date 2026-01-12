@@ -2,17 +2,18 @@
 import { jsPDF } from 'jspdf';
 
 /**
- * Genera un documento PDF con estética corporativa para informes de negocio.
+ * Genera un documento PDF con estética corporativa de alto nivel.
  */
 export const generateProfessionalPDF = (title: string, subtitle: string, content: string, filename: string) => {
   const doc = new jsPDF();
   const date = new Date().toLocaleDateString('es-ES');
   const pageHeight = doc.internal.pageSize.height;
   
-  // Encabezado Corporativo
-  doc.setFillColor(15, 23, 42); // Slate-900
+  // Fondo de encabezado (Slate-900)
+  doc.setFillColor(15, 23, 42); 
   doc.rect(0, 0, 210, 45, 'F');
   
+  // Texto de encabezado
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(22);
@@ -20,52 +21,52 @@ export const generateProfessionalPDF = (title: string, subtitle: string, content
   
   doc.setFontSize(8);
   doc.setFont("helvetica", "normal");
-  doc.text("SISTEMA DE INTELIGENCIA DE NEGOCIO", 20, 33);
-  doc.text(`ID INFORME: ${Math.random().toString(36).substr(2, 9).toUpperCase()}`, 155, 25);
-  doc.text(`FECHA EMISIÓN: ${date}`, 155, 30);
+  doc.text("MEMORIA TÉCNICA - PROYECTO FIN DE CURSO", 20, 33);
+  doc.text(`CÓDIGO: BI-${Math.random().toString(36).substr(2, 5).toUpperCase()}`, 155, 25);
+  doc.text(`EMISIÓN: ${date}`, 155, 30);
 
-  // Títulos de Sección
+  // Títulos de sección en el cuerpo
   doc.setTextColor(15, 23, 42);
   doc.setFontSize(18);
   doc.setFont("helvetica", "bold");
   doc.text(title, 20, 60);
   
-  doc.setFontSize(11);
+  doc.setFontSize(10);
   doc.setFont("helvetica", "italic");
   doc.setTextColor(100, 116, 139);
-  doc.text(subtitle, 20, 68);
+  doc.text(subtitle, 20, 67);
 
   doc.setDrawColor(226, 232, 240);
   doc.line(20, 75, 190, 75);
 
-  // Contenido Principal con Gestión de Páginas
+  // Cuerpo del informe
   doc.setTextColor(51, 65, 85);
   doc.setFont("helvetica", "normal");
   doc.setFontSize(10);
   
-  // Limpiar el contenido de etiquetas si vienen de algún sitio, 
-  // aunque aquí se espera texto plano formateado.
   const splitText = doc.splitTextToSize(content, 170);
   let cursorY = 85;
   const margin = 20;
 
   splitText.forEach((line: string) => {
-    if (cursorY > pageHeight - margin) {
+    if (cursorY > pageHeight - 25) {
       doc.addPage();
-      cursorY = margin;
+      // Dibujar pequeño encabezado en páginas nuevas
+      doc.setFillColor(15, 23, 42);
+      doc.rect(0, 0, 210, 15, 'F');
+      cursorY = 25;
     }
     doc.text(line, margin, cursorY);
-    cursorY += 6;
+    cursorY += 7;
   });
 
-  // Pie de Página
-  doc.setFontSize(8);
-  doc.setTextColor(148, 163, 184);
-  // Fix: Call getNumberOfPages() directly on the jsPDF instance as doc.internal.getNumberOfPages() is deprecated/not available.
+  // Pie de página con numeración
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
     doc.setPage(i);
-    doc.text(`Página ${i} de ${totalPages} - Documento Confidencial PYME-Pulse AI`, 20, pageHeight - 10);
+    doc.setFontSize(8);
+    doc.setTextColor(148, 163, 184);
+    doc.text(`Página ${i} de ${totalPages} | PYME-Pulse AI © 2024`, 20, pageHeight - 10);
   }
   
   doc.save(`${filename}.pdf`);

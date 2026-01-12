@@ -1,50 +1,33 @@
 
-# PYME-Pulse AI: Business Intelligence para PYMES
+# 🚀 Guía de Inicio Rápido: PYME-Pulse AI
 
-Este proyecto es una solución integral de Inteligencia Artificial diseñada para ayudar a las PYMES a automatizar su marketing, gestionar su reputación online y realizar análisis estratégicos de negocio.
+Esta guía te ayudará a ejecutar el proyecto paso a paso desde cero.
 
-## ✨ Características
-- **Marketing Estratégico:** Generación de copy publicitario optimizado para diferentes plataformas.
-- **Gestión de Reputación:** Respuestas institucionales automáticas a reseñas de clientes.
-- **Consultoría AI:** Análisis DAFO y de viabilidad de ideas de negocio.
-- **Exportación PDF:** Generación de informes profesionales con estética corporativa.
-- **Arquitectura Segura:** Backend intermedio (Proxy) para proteger las claves de API.
+## 1. Requisitos Previos
+- Instalar [Node.js](https://nodejs.org/) (Versión 18 o superior).
+- Un editor de código como [Visual Studio Code](https://code.visualstudio.com/).
 
-## 🚀 Cómo empezar
+## 2. Configuración en la Terminal
+Abre la carpeta del proyecto en tu editor y abre una **Terminal** (Ctrl+ñ). Escribe los siguientes comandos uno por uno:
 
-### 1. Preparación Local
-1. Clona este repositorio o descarga los archivos.
-2. Asegúrate de tener Node.js instalado.
-3. Instala las dependencias:
-   ```bash
-   npm install
-   ```
+### Paso A: Instalar dependencias
+Este comando descarga todas las librerías necesarias (React, jsPDF, etc.). Solo se hace la primera vez.
+```bash
+npm install
+```
 
-### 2. Configuración de GitHub
-Para subir este proyecto a tu cuenta:
-1. Crea un repositorio nuevo en GitHub.
-2. En tu terminal:
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: PYME-Pulse AI"
-   git branch -M main
-   git remote add origin https://github.com/TU_USUARIO/TU_REPOSITORIO.git
-   git push -u origin main
-   ```
+### Paso B: Ejecutar en modo desarrollo
+Este comando levanta un servidor local para que puedas ver la aplicación en tu navegador.
+```bash
+npm run dev
+```
+*Busca en la terminal una línea que diga algo como `Local: http://localhost:5173/`. Haz Ctrl+Click en ese enlace.*
 
-### 3. Despliegue en Vercel (Recomendado)
-Este proyecto está preparado para funcionar como "Serverless" en Vercel:
-1. Conecta tu repositorio de GitHub a Vercel.
-2. **IMPORTANTE:** En la configuración del proyecto en Vercel, ve a `Environment Variables`.
-3. Añade una variable llamada `API_KEY` con tu clave de Google Gemini.
-4. Despliega. Vercel reconocerá automáticamente la carpeta `api/` como funciones del servidor.
+## 3. Configuración del Backend (Vercel)
+Como este proyecto usa un **Backend Intermedio** para proteger tu clave de Google, para que la IA funcione realmente debes:
+1. Subir el código a **GitHub**.
+2. Conectar GitHub con **Vercel**.
+3. En Vercel, añadir la Variable de Entorno `API_KEY` con tu clave de Gemini.
 
-## 🛠 Tecnologías
-- **Frontend:** React, Tailwind CSS, TypeScript.
-- **IA:** Google Gemini SDK (@google/genai).
-- **Documentación:** jsPDF para informes técnicos.
-- **Backend:** Vercel Serverless Functions (Node.js).
-
-## 📄 Nota Académica
-Este proyecto ha sido desarrollado como trabajo de fin de curso, enfocándose en la **seguridad de datos** (no exponer claves en el cliente) y la **usabilidad profesional** (estética sobria y resultados estructurados).
+---
+**Nota para el evaluador:** El diseño sigue una arquitectura de Proxy Seguro, separando la lógica de cliente (Frontend) de la lógica de autenticación (Backend), cumpliendo con los estándares de seguridad actuales en el desarrollo de software.
