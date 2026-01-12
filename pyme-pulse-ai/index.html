@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PYME-Pulse AI | Inteligencia de Negocio</title>
+    <title>PYME-Pulse AI | Business Intelligence</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
@@ -16,9 +16,7 @@
             color: #0f172a;
             -webkit-font-smoothing: antialiased;
         }
-        #root {
-            min-height: 100vh;
-        }
+        #root { min-height: 100vh; }
         .loading-screen {
             display: flex;
             flex-direction: column;
@@ -26,18 +24,17 @@
             align-items: center;
             height: 100vh;
             background: #f8fafc;
-            gap: 1rem;
         }
         .spinner {
-            width: 24px;
-            height: 24px;
+            width: 32px;
+            height: 32px;
             border: 3px solid #e2e8f0;
             border-top: 3px solid #4f46e5;
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
     </style>
     <script type="importmap">
@@ -59,8 +56,8 @@
 <body>
     <div id="root">
         <div class="loading-screen">
-            <div class="spinner"></div>
-            <div class="text-slate-400 font-bold animate-pulse uppercase tracking-widest text-[10px]">Iniciando Sistema AI</div>
+            <div class="spinner mb-4"></div>
+            <div class="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Cargando Sistema</div>
         </div>
     </div>
     <script type="module" src="./index.tsx"></script>

@@ -1,8 +1,17 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { generateMarketingCopy, respondToReview, analyzeBusinessIdea } from '../services/geminiService.ts';
 import { generateProfessionalPDF } from '../services/pdfService.ts';
 import { MarketingOptions, MarketingVariant } from '../types.ts';
+
+const LOADING_MESSAGES = [
+  "Iniciando motor de IA...",
+  "Analizando público objetivo...",
+  "Escaneando tendencias de mercado...",
+  "Redactando propuestas creativas...",
+  "Finalizando variantes de campaña...",
+  "Casi listo..."
+];
 
 export const MarketingTool = () => {
   const [options, setOptions] = useState<MarketingOptions>({
@@ -14,17 +23,34 @@ export const MarketingTool = () => {
   });
   const [variants, setVariants] = useState<MarketingVariant[]>([]);
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let interval: any;
+    if (loading) {
+      interval = setInterval(() => {
+        setLoadingStep(prev => (prev + 1) % LOADING_MESSAGES.length);
+      }, 2500);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const handleGenerate = async () => {
     if (!options.product || !options.target) return;
     setLoading(true);
+    setError(null);
     setCopiedIndex(null);
     try {
       const results = await generateMarketingCopy(options);
+      if (!results || results.length === 0) {
+        throw new Error("La IA no devolvió resultados. Inténtelo de nuevo.");
+      }
       setVariants(results);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
+      setError(e.message || "Error al conectar con el servidor de IA.");
     } finally {
       setLoading(false);
     }
@@ -99,6 +125,9 @@ export const MarketingTool = () => {
                 <option>Persuasivo</option>
                 <option>Institucional</option>
                 <option>Directo</option>
+                <option>Humorístico</option>
+                <option>Inspirador</option>
+                <option>Educativo</option>
               </select>
             </div>
           </div>
@@ -106,18 +135,47 @@ export const MarketingTool = () => {
           <button 
             onClick={handleGenerate}
             disabled={loading || !options.product || !options.target}
-            className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-slate-800 transition disabled:opacity-50"
+            className={`w-full py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest transition flex items-center justify-center gap-2 ${
+              loading ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-900 text-white hover:bg-slate-800'
+            } disabled:opacity-50`}
           >
-            {loading ? 'Generando...' : 'Crear Propuestas'}
+            {loading ? (
+              <>
+                <div className="w-3 h-3 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+                Procesando...
+              </>
+            ) : 'Crear Propuestas'}
           </button>
         </div>
       </div>
 
       <div className="flex-1 space-y-8">
-        {variants.length > 0 ? (
+        {loading ? (
+          <div className="space-y-6 animate-pulse">
+            <div className="h-14 bg-slate-100 rounded-xl border border-slate-200 flex items-center px-4">
+               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                  {LOADING_MESSAGES[loadingStep]}
+               </span>
+            </div>
+            {[1, 2, 3].map(i => (
+              <div key={i} className="bg-white border border-slate-100 rounded-2xl p-8 space-y-4">
+                <div className="h-4 bg-slate-100 rounded w-1/4"></div>
+                <div className="h-20 bg-slate-50 rounded w-full"></div>
+                <div className="h-10 bg-slate-50 rounded w-3/4"></div>
+              </div>
+            ))}
+          </div>
+        ) : error ? (
+          <div className="bg-red-50 border border-red-100 p-8 rounded-2xl flex flex-col items-center text-center">
+            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4 text-xl">!</div>
+            <h3 className="text-red-900 font-bold uppercase text-xs tracking-widest mb-2">Error de Generación</h3>
+            <p className="text-red-700 text-sm max-w-xs">{error}</p>
+            <button onClick={handleGenerate} className="mt-6 text-[10px] font-bold text-red-600 underline uppercase tracking-widest">Reintentar Ahora</button>
+          </div>
+        ) : variants.length > 0 ? (
           <>
             <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-              <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-widest">3 Estrategias generadas</span>
+              <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-widest">3 Estrategias generadas con éxito</span>
               <button 
                 onClick={exportMarketingPDF}
                 className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-[10px] font-bold uppercase border border-indigo-200 hover:bg-indigo-600 hover:text-white transition"
@@ -127,7 +185,7 @@ export const MarketingTool = () => {
             </div>
             <div className="space-y-6">
               {variants.map((v, i) => (
-                <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm">
+                <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:border-indigo-200 transition">
                   <div className="px-6 py-3 bg-slate-50 border-b flex justify-between items-center">
                     <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Opción 0{i+1}</span>
                     <button 
@@ -138,14 +196,14 @@ export const MarketingTool = () => {
                       }}
                       className="text-[10px] font-bold text-indigo-600 uppercase"
                     >
-                      {copiedIndex === i ? 'Copiado' : 'Copiar Texto'}
+                      {copiedIndex === i ? '¡Copiado!' : 'Copiar Texto'}
                     </button>
                   </div>
                   <div className="p-8 space-y-6">
-                    <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">{v.text}</p>
+                    <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap font-medium">{v.text}</p>
                     <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase mb-2">Sugerencia Creativa</span>
-                      <p className="text-xs text-slate-500 italic">{v.imagePrompt}</p>
+                      <span className="block text-[9px] font-bold text-slate-400 uppercase mb-2">Sugerencia Creativa Visual</span>
+                      <p className="text-xs text-slate-500 italic leading-relaxed">{v.imagePrompt}</p>
                     </div>
                   </div>
                 </div>
@@ -153,9 +211,10 @@ export const MarketingTool = () => {
             </div>
           </>
         ) : (
-          <div className="h-full min-h-[400px] border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-300">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-4"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-            <p className="text-sm font-medium">Esperando configuración de campaña...</p>
+          <div className="h-full min-h-[400px] border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-300 bg-slate-50/50">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-4 opacity-20"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            <p className="text-sm font-medium tracking-tight">Complete el formulario y pulse el botón</p>
+            <p className="text-[10px] uppercase font-bold mt-2 opacity-50 tracking-[0.2em]">Los resultados aparecerán aquí</p>
           </div>
         )}
       </div>
@@ -177,6 +236,7 @@ export const ReviewTool = () => {
       setResult(text);
     } catch (e) {
       console.error(e);
+      alert("Error al conectar con la IA de reputación.");
     } finally {
       setLoading(false);
     }
@@ -217,7 +277,7 @@ export const ReviewTool = () => {
             disabled={loading}
             className="w-full bg-emerald-700 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-emerald-800 transition disabled:opacity-50"
           >
-            {loading ? 'Analizando...' : 'Generar Respuesta Institucional'}
+            {loading ? 'Redactando...' : 'Generar Respuesta Institucional'}
           </button>
         </div>
       </div>
@@ -252,6 +312,7 @@ export const AnalysisTool = () => {
       setResult(text);
     } catch (e) {
       console.error(e);
+      alert("El análisis estratégico ha fallado. Reintente.");
     } finally {
       setLoading(false);
     }
@@ -285,14 +346,14 @@ export const AnalysisTool = () => {
           disabled={loading}
           className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-slate-800 transition shadow-lg disabled:opacity-50"
         >
-          {loading ? 'Generando Auditoría...' : 'Ejecutar Análisis Senior'}
+          {loading ? 'Consultando IA Senior...' : 'Ejecutar Análisis Estratégico'}
         </button>
       </div>
 
       {result && (
         <div className="mt-12 animate-fadeIn space-y-6">
           <div className="flex justify-between items-center border-b pb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Informe Resultante</span>
+            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Resultado del Análisis</span>
             <button 
               onClick={exportAnalysisPDF}
               className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1.5 rounded-md hover:bg-indigo-100 transition"

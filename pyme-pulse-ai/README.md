@@ -1,33 +1,34 @@
 
 # 🚀 Guía de Inicio Rápido: PYME-Pulse AI
 
-Esta guía te ayudará a ejecutar el proyecto paso a paso desde cero.
+Esta guía explica el funcionamiento de la infraestructura de tu proyecto para la entrega final.
 
-## 1. Requisitos Previos
-- Instalar [Node.js](https://nodejs.org/) (Versión 18 o superior).
-- Un editor de código como [Visual Studio Code](https://code.visualstudio.com/).
+## 1. Arquitectura de la API
+Para este proyecto de fin de curso, hemos implementado una **Arquitectura de Intermediario Seguro (Proxy)**:
 
-## 2. Configuración en la Terminal
-Abre la carpeta del proyecto en tu editor y abre una **Terminal** (Ctrl+ñ). Escribe los siguientes comandos uno por uno:
+1.  **Interfaz (Frontend)**: Los archivos en la raíz y la carpeta `/components`. Es la parte visual que utiliza el usuario.
+2.  **Servidor (Backend)**: El archivo `api/ai.ts`. Es una función que se ejecuta en los servidores de Vercel.
+3.  **Seguridad**: La clave privada (`API_KEY`) de Google Gemini nunca se envía al navegador del usuario. Se mantiene protegida y oculta en el servidor.
 
-### Paso A: Instalar dependencias
-Este comando descarga todas las librerías necesarias (React, jsPDF, etc.). Solo se hace la primera vez.
+## 2. Ubicación de la API en producción
+Una vez que despliegues el proyecto en Vercel, tu servidor responderá en la siguiente dirección:
+`https://tu-proyecto.vercel.app/api/ai`
+
+## 3. Configuración de la Clave Secreta (Paso Obligatorio)
+Para que el sistema de IA funcione correctamente, debes configurar la variable de entorno:
+1. Accede a tu panel de control en **Vercel**.
+2. Ve a la sección **Settings (Configuración) -> Environment Variables (Variables de Entorno)**.
+3. Crea una nueva variable llamada `API_KEY` y pega tu código obtenido de Google AI Studio.
+
+## 4. Comandos para Desarrollo Local
+Si deseas realizar pruebas en tu ordenador:
 ```bash
 npm install
-```
-
-### Paso B: Ejecutar en modo desarrollo
-Este comando levanta un servidor local para que puedas ver la aplicación en tu navegador.
-```bash
 npm run dev
 ```
-*Busca en la terminal una línea que diga algo como `Local: http://localhost:5173/`. Haz Ctrl+Click en ese enlace.*
-
-## 3. Configuración del Backend (Vercel)
-Como este proyecto usa un **Backend Intermedio** para proteger tu clave de Google, para que la IA funcione realmente debes:
-1. Subir el código a **GitHub**.
-2. Conectar GitHub con **Vercel**.
-3. En Vercel, añadir la Variable de Entorno `API_KEY` con tu clave de Gemini.
+*Nota: Para que funcione en local, deberías crear un archivo secreto llamado `.env` con la línea `API_KEY=tu_clave_aqui`, aunque lo más recomendable es probarlo directamente una vez desplegado en Vercel.*
 
 ---
-**Nota para el evaluador:** El diseño sigue una arquitectura de Proxy Seguro, separando la lógica de cliente (Frontend) de la lógica de autenticación (Backend), cumpliendo con los estándares de seguridad actuales en el desarrollo de software.
+**Puntos clave para la presentación:**
+- "Hemos priorizado la seguridad mediante una capa intermedia que protege los activos digitales de la empresa."
+- "La arquitectura serverless permite escalar el servicio sin costes fijos de mantenimiento."
