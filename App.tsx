@@ -1,7 +1,6 @@
-
 import React, { useState } from 'react';
 import { View } from './types';
-import { generateMarketingCopy, analyzeBusinessIdea } from './services/geminiService';
+import { generateMarketingCopy, analyzeBusinessIdea, respondToReview } from './services/geminiService';
 import { generateProfessionalPDF } from './services/pdfService';
 
 const App: React.FC = () => {
@@ -131,6 +130,59 @@ const App: React.FC = () => {
           </ToolLayout>
         );
 
+      case View.REVIEWS:
+        return (
+          <ToolLayout 
+            title="Gestor de Reputación Online"
+            onBack={() => {
+              setCurrentView(View.DASHBOARD);
+              setResults(null);
+            }}
+            onSubmit={async (e: any) => {
+              e.preventDefault();
+              setLoading(true);
+              const { review, business, tone } = e.target.elements;
+              try {
+                const response = await respondToReview(
+                  review.value,
+                  business.value,
+                  tone.value
+                );
+                setResults(response);
+              } catch (err: any) { 
+                alert(err.message || 'Error al generar respuesta');
+              }
+              setLoading(false);
+            }}
+          >
+            <div className="space-y-4">
+              <input 
+                name="business" 
+                placeholder="Nombre de tu negocio" 
+                className="w-full p-4 rounded-xl border border-slate-200" 
+                required 
+              />
+              <textarea 
+                name="review" 
+                placeholder="Reseña del cliente a la que quieres responder..." 
+                className="w-full p-4 rounded-xl border border-slate-200 min-h-[120px]" 
+                required 
+              />
+              <select name="tone" className="w-full p-4 rounded-xl border border-slate-200">
+                <option>Profesional</option>
+                <option>Cálido y Cercano</option>
+                <option>Formal Corporativo</option>
+              </select>
+            </div>
+            {results && (
+              <div className="mt-8 p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
+                <p className="text-xs font-bold text-emerald-600 uppercase tracking-widest mb-3">Respuesta Sugerida</p>
+                <p className="text-sm text-slate-700 leading-relaxed">{results}</p>
+              </div>
+            )}
+          </ToolLayout>
+        );
+
       case View.STRATEGY:
         return (
           <ToolLayout 
@@ -166,14 +218,91 @@ const App: React.FC = () => {
           <div className="max-w-3xl mx-auto text-center animate-fadeIn">
             <div className="mb-12">
               <h2 className="text-3xl font-black text-slate-900 mb-4">Memoria Técnica del Proyecto</h2>
-              <p className="text-slate-500">Documentación detallada sobre la arquitectura, seguridad e impacto de PYME-Pulse AI.</p>
+              <p className="text-slate-500 mb-8">Documentación detallada sobre la arquitectura, seguridad e impacto de PYME-Pulse AI.</p>
             </div>
-            <button 
-              onClick={() => generateProfessionalPDF("Memoria Técnica", "Proyecto Fin de Curso AI", "Contenido detallado del proyecto...", "memoria-final")}
-              className="bg-slate-900 text-white px-10 py-5 rounded-3xl font-bold uppercase tracking-widest hover:bg-indigo-600 transition shadow-2xl"
-            >
-              Descargar Informe Completo (PDF)
-            </button>
+            
+            <div className="space-y-6">
+              <button 
+                onClick={() => {
+                  const content = `
+MEMORIA TÉCNICA - PYME-Pulse AI
+
+1. INTRODUCCIÓN Y CONTEXTO
+
+Este proyecto nace de la necesidad de democratizar el acceso a herramientas de inteligencia artificial avanzada para pequeñas y medianas empresas. PYME-Pulse AI representa una solución integral que combina las capacidades de modelos de lenguaje de última generación con interfaces intuitivas diseñadas específicamente para el contexto empresarial español.
+
+2. ARQUITECTURA TÉCNICA
+
+2.1 Stack Tecnológico
+- Frontend: React 18 con TypeScript para garantizar type-safety
+- Build Tool: Vite para desarrollo rápido y builds optimizados
+- Despliegue: Vercel con funciones serverless
+- Motor de IA: Google Gemini 3 (Flash y Pro)
+- Generación PDF: jsPDF para documentación profesional
+
+2.2 Arquitectura de Aplicación
+La aplicación sigue un patrón de arquitectura cliente-servidor:
+- Cliente: SPA (Single Page Application) en React
+- Servidor: Funciones serverless en Vercel
+- API: Proxy a Google Gemini AI para proteger credenciales
+
+3. MÓDULOS FUNCIONALES
+
+3.1 Generador de Marketing
+Utiliza Gemini Flash con esquemas JSON estructurados para generar variantes de campañas publicitarias adaptadas a diferentes plataformas (Instagram, LinkedIn, Google Ads).
+
+3.2 Gestor de Reputación
+Sistema de respuesta automática a reseñas con configuración de tono personalizable, manteniendo coherencia de marca y profesionalismo.
+
+3.3 Análisis Estratégico
+Emplea Gemini Pro con presupuesto de razonamiento extendido (thinking budget) para análisis DAFO y planificación estratégica de alto nivel.
+
+3.4 Sistema de Documentación
+Generación automática de informes PDF con estética corporativa profesional y estructura académica.
+
+4. SEGURIDAD Y BUENAS PRÁCTICAS
+
+4.1 Protección de Credenciales
+Las API keys se almacenan exclusivamente en variables de entorno de Vercel, nunca en el código cliente. El proxy serverless actúa como intermediario seguro.
+
+4.2 Validación de Datos
+Todos los inputs del usuario pasan por validación tanto en cliente como en servidor antes de ser procesados por la IA.
+
+5. IMPACTO Y RESULTADOS ESPERADOS
+
+Este sistema permite a PYMEs:
+- Reducir costes de agencias de marketing
+- Mejorar tiempos de respuesta a clientes
+- Acceder a consultoría estratégica de nivel profesional
+- Generar documentación técnica de calidad
+
+6. TRABAJO FUTURO
+
+Posibles extensiones incluyen:
+- Integración con redes sociales para publicación directa
+- Sistema de análisis de sentimiento en reseñas
+- Dashboard de métricas y KPIs empresariales
+- Chatbot conversacional para consultas rápidas
+
+CONCLUSIÓN
+
+PYME-Pulse AI demuestra cómo la inteligencia artificial generativa puede ser una herramienta práctica y accesible para pequeñas empresas, mejorando su competitividad y eficiencia operativa sin requerir inversiones significativas en infraestructura o personal especializado.
+                  `;
+                  
+                  generateProfessionalPDF(
+                    "Memoria Técnica del Proyecto",
+                    "PYME-Pulse AI - Sistema de Business Intelligence",
+                    content,
+                    "PYME-Pulse-AI_Memoria-Tecnica"
+                  );
+                }}
+                className="bg-slate-900 text-white px-10 py-5 rounded-3xl font-bold uppercase tracking-widest hover:bg-indigo-600 transition shadow-2xl"
+              >
+                📄 Descargar Memoria Técnica Completa
+              </button>
+              
+              <p className="text-xs text-slate-400">El documento incluye: Arquitectura, Seguridad, Módulos Funcionales e Impacto Empresarial</p>
+            </div>
           </div>
         );
 
