@@ -5,7 +5,7 @@ import { generateProfessionalPDF } from '../services/pdfService';
 const Report: React.FC = () => {
   const exportToPDF = () => {
     const reportTitle = "Pyme-Pulse AI - Memoria Técnica Detallada";
-    const reportSubtitle = "Aplicaciones prácticas de la IA en Pymes Grupo 40 | Alumno: Jose Ramon Garcia Utrero";
+    const reportSubtitle = "Aplicaciones prácticas de la IA en Pymes Grupo 40 | Alumno: José Ramón García Utrero";
     
     const content = `
 1. RESUMEN EJECUTIVO Y JUSTIFICACIÓN DEL PROYECTO
@@ -34,7 +34,7 @@ Se ha seleccionado un stack tecnológico de última generación para garantizar 
 - jsPDF & AutoTable: Herramientas para la generación dinámica de documentos PDF corporativos.
 
 5. ARQUITECTURA DE SEGURIDAD Y FLUJO DE DATOS
-La seguridad es el núcleo de Pyme-Pulse AI. A diferencia de aplicaciones convencionales, aquí los datos del cliente se procesan de forma efímera. La clave de API de Google nunca se expone al navegador; todas las peticiones viajan cifradas hacia nuestro proxy en Vercel, donde se validan antes de contactar con los servicios de IA de Google. Esto garantiza que la propiedad intelectual de la empresa y sus credenciales permanezcan a salvo de ataques de inspección de código.
+La seguridad es el núcleo de Pyme-Pulse AI. A diferencia de aplicaciones convencionales, aquí los datos del cliente se procesan de forma efímera. La clave de API de Google nunca se expone al navegador; todas las peticiones viajan cifradas hacia nuestro proxy en Vercel, donde se validan antes de contactar con los servicios de IA de Google. Esto garantiza que la propiedad intelectual de la empresa y sus credenciales permancan a salvo de ataques de inspección de código.
 
 6. MÓDULO DE MARKETING ESTRATÉGICO
 Este componente utiliza el modelo Gemini Flash para la generación rápida de copys publicitarios. El sistema analiza variables como el producto, el público objetivo y el canal (LinkedIn, Instagram, etc.) para adaptar el registro lingüístico. Además, genera "prompts visuales" detallados, permitiendo una sinergia perfecta entre el texto y la futura imagen de campaña.
@@ -103,7 +103,7 @@ El éxito de este proyecto fin de curso demuestra la viabilidad de integrar solu
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16 text-[10px] font-sans uppercase tracking-widest text-slate-400 border-b border-slate-50 pb-8">
           <div>
             <p className="font-bold text-slate-900 mb-1">Autoría del Proyecto</p>
-            <p>Jose Ramon Garcia Utrero</p>
+            <p>José Ramón García Utrero</p>
           </div>
           <div className="md:text-right">
             <p className="font-bold text-slate-900 mb-1">Estado de Entrega</p>
@@ -127,7 +127,7 @@ El éxito de este proyecto fin de curso demuestra la viabilidad de integrar solu
             </h4>
             <div className="bg-slate-50 p-6 rounded-2xl border border-slate-100">
               <p className="text-slate-600 text-sm leading-relaxed">
-                Desarrollado íntegramente por <strong>Jose Ramon Garcia Utrero</strong> para el <strong>Grupo 40</strong>, este proyecto valida la integración de modelos generativos en procesos operativos reales de una PYME. El PDF descargable incluye 10 secciones de análisis profundo sobre seguridad, arquitectura serverless e impacto en la productividad de negocio.
+                Desarrollado íntegramente por <strong>José Ramón García Utrero</strong> para el <strong>Grupo 40</strong>, este proyecto valida la integración de modelos generativos en procesos operativos reales de una PYME. El PDF descargable incluye 10 secciones de análisis profundo sobre seguridad, arquitectura serverless e impacto en la productividad de negocio.
               </p>
             </div>
           </section>

@@ -47,7 +47,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, setView }) => {
         <div className="bg-slate-50 rounded-2xl p-4 text-center">
           <p className="text-[9px] text-slate-500 font-medium leading-relaxed">
             Proyecto fin de curso del Alumno:<br />
-            <span className="text-slate-900 font-bold">José Ramón Garcia, Utrero</span>
+            <span className="text-slate-900 font-bold">José Ramón García Utrero</span>
           </p>
         </div>
       </div>

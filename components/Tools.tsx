@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { generateMarketingCopy, respondToReview, analyzeBusinessIdea } from '../services/geminiService';
+import { generateMarketingCopy, respondToReview, analyzeBusinessIdea } from '../services/aiService';
 import { generateProfessionalPDF } from '../services/pdfService';
 import { MarketingOptions, MarketingVariant } from '../types';
 
@@ -9,7 +9,6 @@ const LOADING_MESSAGES = [
   "Analizando público objetivo...",
   "Escaneando tendencias de mercado...",
   "Redactando propuestas creativas...",
-  "Finalizando variantes de campaña...",
   "Casi listo..."
 ];
 
@@ -44,9 +43,6 @@ export const MarketingTool = () => {
     setCopiedIndex(null);
     try {
       const results = await generateMarketingCopy(options);
-      if (!results || results.length === 0) {
-        throw new Error("La IA no devolvió resultados. Inténtelo de nuevo.");
-      }
       setVariants(results);
     } catch (e: any) {
       console.error(e);
@@ -70,18 +66,18 @@ export const MarketingTool = () => {
   };
 
   return (
-    <div className="flex flex-col xl:flex-row gap-10">
-      <div className="xl:w-1/3 bg-white p-8 rounded-2xl shadow-sm border border-slate-200 h-fit sticky top-8">
+    <div className="flex flex-col xl:flex-row gap-10 animate-fadeIn">
+      <div className="xl:w-1/3 bg-white p-8 rounded-3xl shadow-sm border border-slate-200 h-fit sticky top-8">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-1 h-8 bg-indigo-600 rounded-full"></div>
-          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Campaña de Marketing</h2>
+          <div className="w-1.5 h-8 bg-indigo-600 rounded-full"></div>
+          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Marketing AI</h2>
         </div>
         
         <div className="space-y-6">
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Producto o Servicio</label>
             <textarea 
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-indigo-500 outline-none transition text-sm" 
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition text-sm" 
               rows={3}
               placeholder="¿Qué ofrece su empresa?"
               value={options.product}
@@ -93,41 +89,38 @@ export const MarketingTool = () => {
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Público Objetivo</label>
             <input 
               type="text" 
-              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl focus:ring-1 focus:ring-indigo-500 outline-none transition text-sm" 
-              placeholder="Ej: Directivos de RRHH, Dueños de PYMES..."
+              className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-indigo-100 focus:border-indigo-400 outline-none transition text-sm" 
+              placeholder="Ej: Directivos de RRHH..."
               value={options.target}
               onChange={(e) => setOptions({...options, target: e.target.value})}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            <div className="col-span-1">
+            <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Canal</label>
               <select 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm appearance-none"
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm cursor-pointer"
                 value={options.platform}
                 onChange={(e) => setOptions({...options, platform: e.target.value})}
               >
                 <option>LinkedIn</option>
                 <option>Instagram</option>
                 <option>Facebook Ads</option>
-                <option>Email Marketing</option>
+                <option>TikTok</option>
               </select>
             </div>
-            <div className="col-span-1">
+            <div>
               <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Tono</label>
               <select 
-                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl outline-none text-sm appearance-none"
+                className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl outline-none text-sm cursor-pointer"
                 value={options.tone}
                 onChange={(e) => setOptions({...options, tone: e.target.value})}
               >
                 <option>Analítico</option>
                 <option>Persuasivo</option>
-                <option>Institucional</option>
-                <option>Directo</option>
-                <option>Humorístico</option>
                 <option>Inspirador</option>
-                <option>Educativo</option>
+                <option>Directo</option>
               </select>
             </div>
           </div>
@@ -135,86 +128,77 @@ export const MarketingTool = () => {
           <button 
             onClick={handleGenerate}
             disabled={loading || !options.product || !options.target}
-            className={`w-full py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest transition flex items-center justify-center gap-2 ${
-              loading ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-900 text-white hover:bg-slate-800'
+            className={`w-full py-4 rounded-2xl font-bold uppercase text-[11px] tracking-widest transition-all ${
+              loading ? 'bg-indigo-100 text-indigo-600' : 'bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-100'
             } disabled:opacity-50`}
           >
-            {loading ? (
-              <>
-                <div className="w-3 h-3 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                Procesando...
-              </>
-            ) : 'Crear Propuestas'}
+            {loading ? 'Procesando...' : 'Generar Campaña'}
           </button>
         </div>
       </div>
 
-      <div className="flex-1 space-y-8">
+      <div className="flex-1">
         {loading ? (
-          <div className="space-y-6 animate-pulse">
-            <div className="h-14 bg-slate-100 rounded-xl border border-slate-200 flex items-center px-4">
-               <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+          <div className="space-y-6">
+            <div className="h-14 bg-indigo-50 rounded-2xl border border-indigo-100 flex items-center px-6">
+               <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest animate-pulse">
                   {LOADING_MESSAGES[loadingStep]}
                </span>
             </div>
             {[1, 2, 3].map(i => (
-              <div key={i} className="bg-white border border-slate-100 rounded-2xl p-8 space-y-4">
+              <div key={i} className="bg-white border border-slate-100 rounded-3xl p-8 space-y-4 animate-pulse">
                 <div className="h-4 bg-slate-100 rounded w-1/4"></div>
                 <div className="h-20 bg-slate-50 rounded w-full"></div>
                 <div className="h-10 bg-slate-50 rounded w-3/4"></div>
               </div>
             ))}
           </div>
-        ) : error ? (
-          <div className="bg-red-50 border border-red-100 p-8 rounded-2xl flex flex-col items-center text-center">
-            <div className="w-12 h-12 bg-red-100 text-red-600 rounded-full flex items-center justify-center mb-4 text-xl">!</div>
-            <h3 className="text-red-900 font-bold uppercase text-xs tracking-widest mb-2">Error de Generación</h3>
-            <p className="text-red-700 text-sm max-w-xs">{error}</p>
-            <button onClick={handleGenerate} className="mt-6 text-[10px] font-bold text-red-600 underline uppercase tracking-widest">Reintentar Ahora</button>
-          </div>
         ) : variants.length > 0 ? (
-          <>
-            <div className="flex justify-between items-center bg-indigo-50 p-4 rounded-xl border border-indigo-100">
-              <span className="text-[10px] font-bold text-indigo-700 uppercase tracking-widest">3 Estrategias generadas con éxito</span>
+          <div className="space-y-6">
+            <div className="flex justify-between items-center bg-white p-6 rounded-3xl border border-slate-200 shadow-sm">
+              <div>
+                <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em]">Resultados Obtenidos</span>
+                <p className="text-sm font-bold text-slate-900">3 Variantes de Copy para {options.platform}</p>
+              </div>
               <button 
                 onClick={exportMarketingPDF}
-                className="bg-white text-indigo-600 px-4 py-2 rounded-lg text-[10px] font-bold uppercase border border-indigo-200 hover:bg-indigo-600 hover:text-white transition"
+                className="bg-slate-900 text-white px-6 py-3 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-indigo-600 transition shadow-xl shadow-slate-200"
               >
-                Descargar Informe PDF
+                Exportar Informe
               </button>
             </div>
-            <div className="space-y-6">
-              {variants.map((v, i) => (
-                <div key={i} className="bg-white border border-slate-200 rounded-2xl overflow-hidden shadow-sm hover:border-indigo-200 transition">
-                  <div className="px-6 py-3 bg-slate-50 border-b flex justify-between items-center">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Opción 0{i+1}</span>
-                    <button 
-                      onClick={() => {
-                        navigator.clipboard.writeText(v.text);
-                        setCopiedIndex(i);
-                        setTimeout(() => setCopiedIndex(null), 2000);
-                      }}
-                      className="text-[10px] font-bold text-indigo-600 uppercase"
-                    >
-                      {copiedIndex === i ? '¡Copiado!' : 'Copiar Texto'}
-                    </button>
-                  </div>
-                  <div className="p-8 space-y-6">
-                    <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap font-medium">{v.text}</p>
-                    <div className="p-4 bg-slate-50 rounded-lg border border-slate-100">
-                      <span className="block text-[9px] font-bold text-slate-400 uppercase mb-2">Sugerencia Creativa Visual</span>
-                      <p className="text-xs text-slate-500 italic leading-relaxed">{v.imagePrompt}</p>
-                    </div>
+            {variants.map((v, i) => (
+              <div key={i} className="bg-white border border-slate-200 rounded-3xl overflow-hidden hover:border-indigo-300 transition-colors shadow-sm">
+                <div className="px-8 py-4 bg-slate-50 border-b flex justify-between items-center">
+                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Estrategia 0{i+1}</span>
+                  <button 
+                    onClick={() => {
+                      navigator.clipboard.writeText(v.text);
+                      setCopiedIndex(i);
+                      setTimeout(() => setCopiedIndex(null), 2000);
+                    }}
+                    className="text-[10px] font-bold text-indigo-600 uppercase hover:underline"
+                  >
+                    {copiedIndex === i ? '¡Copiado!' : 'Copiar Texto'}
+                  </button>
+                </div>
+                <div className="p-8 space-y-6">
+                  <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap font-medium">{v.text}</p>
+                  <div className="p-5 bg-indigo-50/50 rounded-2xl border border-indigo-100">
+                    <span className="block text-[9px] font-black text-indigo-400 uppercase mb-2 tracking-widest">Concepto Visual IA</span>
+                    <p className="text-xs text-indigo-900 italic leading-relaxed">{v.imagePrompt}</p>
                   </div>
                 </div>
-              ))}
-            </div>
-          </>
+              </div>
+            ))}
+          </div>
         ) : (
-          <div className="h-full min-h-[400px] border-2 border-dashed border-slate-200 rounded-3xl flex flex-col items-center justify-center text-slate-300 bg-slate-50/50">
-            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" className="mb-4 opacity-20"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
-            <p className="text-sm font-medium tracking-tight">Complete el formulario y pulse el botón</p>
-            <p className="text-[10px] uppercase font-bold mt-2 opacity-50 tracking-[0.2em]">Los resultados aparecerán aquí</p>
+          <div className="h-full min-h-[500px] border-2 border-dashed border-slate-200 rounded-[3rem] flex flex-col items-center justify-center text-slate-300 bg-white">
+            <div className="w-16 h-16 bg-slate-50 rounded-3xl flex items-center justify-center mb-6">
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-20"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path></svg>
+            </div>
+            <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Esperando Parámetros</p>
+            <p className="text-xs text-slate-300 mt-2">Configure su campaña para comenzar</p>
           </div>
         )}
       </div>
@@ -236,63 +220,48 @@ export const ReviewTool = () => {
       setResult(text);
     } catch (e) {
       console.error(e);
-      alert("Error al conectar con la IA de reputación.");
     } finally {
       setLoading(false);
     }
   };
 
-  const exportReviewPDF = () => {
-    generateProfessionalPDF(
-      "Gestión de Crisis y Reputación",
-      `Empresa: ${bizName} | Respuesta Institucional`,
-      `RESEÑA RECIBIDA:\n"${review}"\n\n--------------------------------\n\nPROPUESTA DE RESPUESTA OFICIAL:\n\n${result}`,
-      `respuesta-cliente-${bizName.toLowerCase().replace(/\s/g, '-')}`
-    );
-  };
-
   return (
-    <div className="max-w-2xl mx-auto space-y-8">
-      <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-200">
+    <div className="max-w-3xl mx-auto space-y-8 animate-fadeIn">
+      <div className="bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-200">
         <div className="flex items-center gap-3 mb-8">
-          <div className="w-1 h-8 bg-emerald-600 rounded-full"></div>
-          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Gestión de Reputación</h2>
+          <div className="w-1.5 h-8 bg-emerald-500 rounded-full"></div>
+          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Reputación Corporativa</h2>
         </div>
         <div className="space-y-6">
           <input 
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500" 
-            placeholder="Nombre comercial..."
+            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-emerald-100 transition" 
+            placeholder="Nombre comercial de la empresa..."
             value={bizName}
             onChange={(e) => setBizName(e.target.value)}
           />
           <textarea 
             rows={4}
-            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:ring-1 focus:ring-emerald-500" 
-            placeholder="Pegue aquí el comentario del cliente..."
+            className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-emerald-100 transition" 
+            placeholder="Pegue aquí el comentario o reseña del cliente..."
             value={review}
             onChange={(e) => setReview(e.target.value)}
           />
           <button 
             onClick={handleRespond}
             disabled={loading}
-            className="w-full bg-emerald-700 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-emerald-800 transition disabled:opacity-50"
+            className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold uppercase text-[11px] tracking-widest hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100 disabled:opacity-50"
           >
-            {loading ? 'Redactando...' : 'Generar Respuesta Institucional'}
+            {loading ? 'Generando Respuesta...' : 'Analizar y Responder'}
           </button>
         </div>
       </div>
 
       {result && (
         <div className="animate-fadeIn space-y-4">
-          <div className="bg-emerald-50 p-8 rounded-2xl border border-emerald-100 italic text-sm text-emerald-900 leading-relaxed shadow-inner">
-            {result}
+          <div className="bg-white p-10 rounded-[2.5rem] border border-emerald-100 shadow-xl shadow-emerald-50/50">
+            <h4 className="text-[10px] font-black text-emerald-500 uppercase tracking-[0.3em] mb-4">Propuesta Institucional</h4>
+            <p className="text-slate-700 text-lg leading-relaxed font-medium">{result}</p>
           </div>
-          <button 
-            onClick={exportReviewPDF}
-            className="w-full py-3 bg-white border border-slate-200 text-slate-600 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:border-emerald-600 hover:text-emerald-700 transition"
-          >
-            Descargar como Comunicado PDF
-          </button>
         </div>
       )}
     </div>
@@ -312,64 +281,50 @@ export const AnalysisTool = () => {
       setResult(text);
     } catch (e) {
       console.error(e);
-      alert("El análisis estratégico ha fallado. Reintente.");
     } finally {
       setLoading(false);
     }
   };
 
-  const exportAnalysisPDF = () => {
-    generateProfessionalPDF(
-      "Auditoría Estratégica AI",
-      "Análisis de Viabilidad y Mercado",
-      `DESCRIPCIÓN DE LA SITUACIÓN:\n${idea}\n\n--------------------------------\n\nINFORME DE CONSULTORÍA:\n\n${result}`,
-      "auditoria-estrategica"
-    );
-  };
-
   return (
-    <div className="bg-white p-10 rounded-2xl shadow-sm border border-slate-200">
-      <div className="flex items-center gap-3 mb-8">
-        <div className="w-1 h-8 bg-slate-800 rounded-full"></div>
-        <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Consultoría Estratégica</h2>
-      </div>
-      <div className="space-y-8">
-        <textarea 
-          rows={5}
-          className="w-full p-5 bg-slate-50 border border-slate-200 rounded-xl text-sm leading-relaxed outline-none focus:ring-1 focus:ring-slate-500" 
-          placeholder="Describa su idea de negocio, problema operativo o cambio estratégico..."
-          value={idea}
-          onChange={(e) => setIdea(e.target.value)}
-        />
-        <button 
-          onClick={handleAnalyze}
-          disabled={loading}
-          className="w-full bg-slate-900 text-white py-4 rounded-xl font-bold uppercase text-[11px] tracking-widest hover:bg-slate-800 transition shadow-lg disabled:opacity-50"
-        >
-          {loading ? 'Consultando IA Senior...' : 'Ejecutar Análisis Estratégico'}
-        </button>
-      </div>
-
-      {result && (
-        <div className="mt-12 animate-fadeIn space-y-6">
-          <div className="flex justify-between items-center border-b pb-4">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]">Resultado del Análisis</span>
-            <button 
-              onClick={exportAnalysisPDF}
-              className="text-[10px] font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1.5 rounded-md hover:bg-indigo-100 transition"
-            >
-              Exportar Informe PDF
-            </button>
-          </div>
-          <div className="prose prose-slate max-w-none">
-            {result.split('\n').map((line, i) => (
-              <p key={i} className="text-sm text-slate-600 leading-loose mb-3">
-                {line}
-              </p>
-            ))}
-          </div>
+    <div className="animate-fadeIn">
+      <div className="max-w-4xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-200">
+        <div className="flex items-center gap-3 mb-8">
+          <div className="w-1.5 h-8 bg-amber-500 rounded-full"></div>
+          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Consultoría Estratégica Senior</h2>
         </div>
-      )}
+        <div className="space-y-8">
+          <textarea 
+            rows={5}
+            className="w-full p-6 bg-slate-50 border border-slate-200 rounded-3xl text-sm leading-relaxed outline-none focus:ring-2 focus:ring-amber-100 transition" 
+            placeholder="Describa su idea de negocio, problema operativo o cambio estratégico para que Gemini Pro la analice..."
+            value={idea}
+            onChange={(e) => setIdea(e.target.value)}
+          />
+          <button 
+            onClick={handleAnalyze}
+            disabled={loading}
+            className="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold uppercase text-[11px] tracking-widest hover:bg-amber-600 transition shadow-xl shadow-slate-200 disabled:opacity-50"
+          >
+            {loading ? 'Razonando con Gemini Pro (Thinking Mode)...' : 'Ejecutar Auditoría Avanzada'}
+          </button>
+        </div>
+
+        {result && (
+          <div className="mt-12 animate-fadeIn space-y-8 border-t border-slate-100 pt-12">
+            <div className="prose prose-slate max-w-none">
+              {result.split('\n').map((line, i) => {
+                const isHeader = /^\d+\./.test(line.trim()) || line.toUpperCase() === line && line.length > 5;
+                return (
+                  <p key={i} className={`text-sm leading-loose mb-4 ${isHeader ? 'font-black text-slate-900 uppercase tracking-wider text-xs' : 'text-slate-600'}`}>
+                    {line}
+                  </p>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
