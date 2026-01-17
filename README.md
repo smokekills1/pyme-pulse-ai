@@ -1,34 +1,34 @@
-PYME-Pulse AI
-SISTEMA DE INTELIGENCIA DE NEGOCIO
-ID INFORME: 68Z8RGU4T
-FECHA EMISIÓN: 12/1/2026
-PYME-Pulse AI: Memoria Técnica
-Documentación del Proyecto de Fin de Curso
-1. RESUMEN EJECUTIVO
-Esta memoria técnica documenta el desarrollo de PYME-Pulse AI, una plataforma integral diseñada para
-mitigar las barreras de entrada de las pequeñas y medianas empresas en el ecosistema de la Inteligencia
-Artificial. El proyecto se centra en tres pilares: automatización de marketing, gestión reputacional y análisis
-de consultoría estratégica.
-2. ECOSISTEMA TECNOLÓGICO
-- Frontend Core: React 18 con TypeScript para un desarrollo robusto y tipado, garantizando la mantenibilidad
-del código.
-- Motor de IA: Integración de Google Gemini SDK utilizando modelos Flash (velocidad) y Pro (razonamiento
-complejo).
-- Diseño & UI: Tailwind CSS para una interfaz minimalista, corporativa y totalmente adaptativa.
-- Reporting: Librería jsPDF para la transcodificación de resultados de IA en documentos técnicos
-exportables.
-3. METODOLOGÍA Y SEGURIDAD (BACKEND PROXY)
-Uno de los hitos técnicos más críticos ha sido la implementación de un Backend Intermedio (API Proxy).
-Esta arquitectura garantiza:
-- Protección de Activos: La API_KEY se almacena en variables de entorno del servidor (Vercel), impidiendo
-su exposición.
-- Abstracción de Lógica: El frontend delega el procesamiento pesado al servidor.
-- Ingeniería de Prompts: Instrucciones que fuerzan un tono institucional y profesional B2B.
-4. FASES DE DESARROLLO
-- Fase 1: Diseño de Experiencia (UX). Creación de interfaz sobria basada en colores Slate e Indigo.
-- Fase 2: Integración de Modelos Generativos. Configuración de esquemas de respuesta JSON para datos
-estructurados.
-- Fase 3: Optimización y Despliegue. Control de versiones Git y despliegue CI/CD.
-5. CONCLUSIÓN Y FUTURO
-PYME-Pulse AI demuestra que la integración de modelos de lenguaje de última generación bajo una
-arquitectura segura puede transformar la competitividad de las PYMES.
+
+# 🚀 Guía de Inicio Rápido: PYME-Pulse AI
+
+Esta guía explica el funcionamiento de la infraestructura de tu proyecto para la entrega final.
+
+## 1. Arquitectura de la API
+Para este proyecto de fin de curso, hemos implementado una **Arquitectura de Intermediario Seguro (Proxy)**:
+
+1.  **Interfaz (Frontend)**: Los archivos en la raíz y la carpeta `/components`. Es la parte visual que utiliza el usuario.
+2.  **Servidor (Backend)**: El archivo `api/ai.ts`. Es una función que se ejecuta en los servidores de Vercel.
+3.  **Seguridad**: La clave privada (`API_KEY`) de Google Gemini nunca se envía al navegador del usuario. Se mantiene protegida y oculta en el servidor.
+
+## 2. Ubicación de la API en producción
+Una vez que despliegues el proyecto en Vercel, tu servidor responderá en la siguiente dirección:
+`https://tu-proyecto.vercel.app/api/ai`
+
+## 3. Configuración de la Clave Secreta (Paso Obligatorio)
+Para que el sistema de IA funcione correctamente, debes configurar la variable de entorno:
+1. Accede a tu panel de control en **Vercel**.
+2. Ve a la sección **Settings (Configuración) -> Environment Variables (Variables de Entorno)**.
+3. Crea una nueva variable llamada `API_KEY` y pega tu código obtenido de Google AI Studio.
+
+## 4. Comandos para Desarrollo Local
+Si deseas realizar pruebas en tu ordenador:
+```bash
+npm install
+npm run dev
+```
+*Nota: Para que funcione en local, deberías crear un archivo secreto llamado `.env` con la línea `API_KEY=tu_clave_aqui`, aunque lo más recomendable es probarlo directamente una vez desplegado en Vercel.*
+
+---
+**Puntos clave para la presentación:**
+- "Hemos priorizado la seguridad mediante una capa intermedia que protege los activos digitales de la empresa."
+- "La arquitectura serverless permite escalar el servicio sin costes fijos de mantenimiento."
