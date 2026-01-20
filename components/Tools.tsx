@@ -45,8 +45,7 @@ export const MarketingTool = () => {
       const results = await generateMarketingCopy(options);
       setVariants(results);
     } catch (e: any) {
-      console.error(e);
-      setError(e.message || "Error al conectar con el servidor de IA.");
+      setError(e.message || "Error al conectar con el servicio de IA.");
     } finally {
       setLoading(false);
     }
@@ -74,6 +73,7 @@ export const MarketingTool = () => {
         </div>
         
         <div className="space-y-6">
+          {error && <div className="p-4 bg-red-50 text-red-600 text-[10px] font-bold uppercase rounded-xl border border-red-100">{error}</div>}
           <div>
             <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Producto o Servicio</label>
             <textarea 
@@ -211,15 +211,17 @@ export const ReviewTool = () => {
   const [bizName, setBizName] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleRespond = async () => {
     if (!review || !bizName) return;
     setLoading(true);
+    setError(null);
     try {
-      const text = await respondToReview(review, bizName);
-      setResult(text);
-    } catch (e) {
-      console.error(e);
+      const data = await respondToReview(review, bizName);
+      setResult(data);
+    } catch (e: any) {
+      setError(e.message || "Error al procesar la reseña.");
     } finally {
       setLoading(false);
     }
@@ -233,6 +235,7 @@ export const ReviewTool = () => {
           <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Reputación Corporativa</h2>
         </div>
         <div className="space-y-6">
+          {error && <div className="p-4 bg-red-50 text-red-600 text-[10px] font-bold uppercase rounded-xl border border-red-100">{error}</div>}
           <input 
             className="w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm outline-none focus:ring-2 focus:ring-emerald-100 transition" 
             placeholder="Nombre comercial de la empresa..."
@@ -272,15 +275,18 @@ export const AnalysisTool = () => {
   const [idea, setIdea] = useState('');
   const [result, setResult] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleAnalyze = async () => {
     if (!idea) return;
     setLoading(true);
+    setError(null);
+    setResult('');
     try {
-      const text = await analyzeBusinessIdea(idea);
-      setResult(text);
-    } catch (e) {
-      console.error(e);
+      const data = await analyzeBusinessIdea(idea);
+      setResult(data);
+    } catch (e: any) {
+      setError(e.message || "Error en el razonamiento estratégico.");
     } finally {
       setLoading(false);
     }
@@ -294,10 +300,11 @@ export const AnalysisTool = () => {
           <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Consultoría Estratégica Senior</h2>
         </div>
         <div className="space-y-8">
+          {error && <div className="p-4 bg-red-50 text-red-600 text-[10px] font-bold uppercase rounded-xl border border-red-100">{error}</div>}
           <textarea 
             rows={5}
             className="w-full p-6 bg-slate-50 border border-slate-200 rounded-3xl text-sm leading-relaxed outline-none focus:ring-2 focus:ring-amber-100 transition" 
-            placeholder="Describa su idea de negocio, problema operativo o cambio estratégico para que Gemini Pro la analice..."
+            placeholder="Describa su idea de negocio, problema operativo o cambio estratégico para que el sistema realice una auditoría..."
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
           />
@@ -306,19 +313,27 @@ export const AnalysisTool = () => {
             disabled={loading}
             className="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold uppercase text-[11px] tracking-widest hover:bg-amber-600 transition shadow-xl shadow-slate-200 disabled:opacity-50"
           >
-            {loading ? 'Razonando con Gemini Pro (Thinking Mode)...' : 'Ejecutar Auditoría Avanzada'}
+            {loading ? 'Razonando Análisis (Gemini Pro)...' : 'Ejecutar Auditoría Avanzada'}
           </button>
         </div>
 
         {result && (
           <div className="mt-12 animate-fadeIn space-y-8 border-t border-slate-100 pt-12">
-            <div className="prose prose-slate max-w-none">
+            <div className="max-w-none">
               {result.split('\n').map((line, i) => {
-                const isHeader = /^\d+\./.test(line.trim()) || line.toUpperCase() === line && line.length > 5;
+                const trimmed = line.trim();
+                if (!trimmed) return <div key={i} className="h-4"></div>;
+                
+                // Limpieza de caracteres de Markdown (* o #)
+                const cleanLine = trimmed.replace(/[*#]/g, '');
+                
+                // Detectar encabezados (ej: "1. Diagnóstico" o texto en mayúsculas)
+                const isHeader = /^\d+\./.test(cleanLine) || (cleanLine.toUpperCase() === cleanLine && cleanLine.length > 5);
+                
                 return (
-                  <p key={i} className={`text-sm leading-loose mb-4 ${isHeader ? 'font-black text-slate-900 uppercase tracking-wider text-xs' : 'text-slate-600'}`}>
-                    {line}
-                  </p>
+                  <div key={i} className={`${isHeader ? 'font-black text-slate-900 uppercase tracking-wider text-xs mt-8 mb-4 border-l-4 border-amber-400 pl-4' : 'text-slate-600 text-sm leading-relaxed mb-2 pl-5'}`}>
+                    {cleanLine}
+                  </div>
                 );
               })}
             </div>
