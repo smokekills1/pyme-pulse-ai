@@ -2,23 +2,24 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { MarketingOptions, MarketingVariant } from "../types";
 
-// Inicialización del cliente de IA usando la variable de entorno del sistema
-const getAiClient = () => new GoogleGenAI({ apiKey: process.env.API_KEY as string });
+const getAiClient = () => {
+  const apiKey = process.env.API_KEY;
+  if (!apiKey || apiKey === "") {
+    throw new Error("API_KEY no detectada. Verifica las variables de entorno en Vercel.");
+  }
+  return new GoogleGenAI({ apiKey });
+};
 
-/**
- * Genera copys de marketing estructurados usando JSON Schema para máxima fiabilidad.
- */
 export const generateMarketingCopy = async (options: MarketingOptions): Promise<MarketingVariant[]> => {
-  const ai = getAiClient();
-  const prompt = `Actúa como un Experto en Marketing Digital para PYMES. 
-  Genera 3 variantes de anuncios altamente persuasivos para la plataforma ${options.platform}.
-  PRODUCTO/SERVICIO: ${options.product}
-  PÚBLICO OBJETIVO: ${options.target}
-  TONO DE VOZ: ${options.tone}
-  
-  Para cada variante, incluye el texto del anuncio y un "imagePrompt" detallado para generar la imagen que lo acompaña.`;
-
   try {
+    const ai = getAiClient();
+    const prompt = `Actúa como Experto en Marketing Digital. 
+    Genera 3 variantes de anuncios persuasivos para ${options.platform}.
+    PRODUCTO: ${options.product}
+    TARGET: ${options.target}
+    TONO: ${options.tone}
+    Devuelve estrictamente un array JSON con objetos que tengan 'text' e 'imagePrompt'.`;
+
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -29,71 +30,57 @@ export const generateMarketingCopy = async (options: MarketingOptions): Promise<
           items: {
             type: Type.OBJECT,
             properties: {
-              text: { type: Type.STRING, description: "El cuerpo de texto del anuncio." },
-              imagePrompt: { type: Type.STRING, description: "Prompt para generar la imagen descriptiva." }
+              text: { type: Type.STRING },
+              imagePrompt: { type: Type.STRING }
             },
             required: ["text", "imagePrompt"]
           }
         }
       }
     });
-
-    const result = JSON.parse(response.text || "[]");
-    return result;
-  } catch (error) {
-    console.error("Error en Marketing AI:", error);
-    throw new Error("No se pudo generar la campaña. Verifique su conexión.");
+    
+    return JSON.parse(response.text || "[]");
+  } catch (error: any) {
+    console.error("Error Marketing:", error);
+    throw new Error(error.message || "Fallo en motor de marketing.");
   }
 };
 
-/**
- * Responde a reseñas de clientes manteniendo el tono de marca.
- */
 export const respondToReview = async (review: string, business: string, tone: string = 'Profesional'): Promise<string> => {
-  const ai = getAiClient();
-  const prompt = `Eres el Director de Atención al Cliente de "${business}". 
-  Responde de forma impecable a la siguiente reseña: "${review}".
-  TONO: ${tone}. 
-  REGLAS: Máximo 80 palabras, castellano de España, profesional y empático. No uses emojis.`;
-
   try {
+    const ai = getAiClient();
+    const prompt = `Responde a esta reseña para la empresa "${business}": "${review}". Tono ${tone}. Máximo 60 palabras.`;
+
     const response = await ai.models.generateContent({
       model: 'gemini-3-flash-preview',
       contents: [{ role: 'user', parts: [{ text: prompt }] }]
     });
-
-    return response.text || "Gracias por su comentario. Estamos trabajando para mejorar.";
-  } catch (error) {
-    console.error("Error en Review AI:", error);
-    throw new Error("Error al procesar la respuesta a la reseña.");
+    return response.text || "Gracias por su comentario.";
+  } catch (error: any) {
+    throw new Error(`Error en Reseñas: ${error.message}`);
   }
 };
 
-/**
- * Realiza un análisis estratégico profundo usando el modelo Pro con capacidades de razonamiento.
- */
 export const analyzeBusinessIdea = async (idea: string): Promise<string> => {
-  const ai = getAiClient();
-  const prompt = `Realiza una auditoría estratégica integral para la siguiente propuesta de negocio: "${idea}".
-  Debes incluir:
-  1. Diagnóstico de Viabilidad.
-  2. Análisis DAFO detallado.
-  3. 3 Estrategias de Crecimiento Prioritarias.
-  4. Hoja de ruta (Next Steps) a 6 meses.`;
-
   try {
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-preview',
-      contents: [{ role: 'user', parts: [{ text: prompt }] }],
-      config: {
-        thinkingConfig: { thinkingBudget: 4000 },
-        systemInstruction: "Eres un Consultor Estratégico de alto nivel. Tu lenguaje es sobrio, técnico y directo. Estructura el informe con secciones claras y numeradas. Usa castellano de España. Evita el uso de asteriscos innecesarios en el texto final."
-      }
-    });
+    const ai = getAiClient();
+    const prompt = `Actúa como un Consultor Senior de Estrategia de Negocio. Analiza la siguiente propuesta: "${idea}". 
+    Proporciona de forma estructurada:
+    1. DIAGNÓSTICO DE VIABILIDAD
+    2. ANÁLISIS DAFO (Debilidades, Amenazas, Fortalezas, Oportunidades)
+    3. PLAN DE ACCIÓN (3 pasos críticos a seguir ahora mismo).
+    Usa un tono profesional, ejecutivo y directo.`;
 
-    return response.text || "No se pudo generar el análisis detallado.";
-  } catch (error) {
-    console.error("Error en Analysis AI:", error);
-    throw new Error("El análisis estratégico requiere más tiempo o recursos. Intente simplificar la descripción.");
+    const response = await ai.models.generateContent({
+      model: 'gemini-3-flash-preview',
+      contents: [{ role: 'user', parts: [{ text: prompt }] }]
+    });
+    return response.text || "El análisis no pudo completarse. Por favor, intente con una descripción más breve.";
+  } catch (error: any) {
+    console.error("Error Estrategia:", error);
+    if (error.message?.includes("resource") || error.message?.includes("quota")) {
+      throw new Error("El servidor de IA está saturado temporalmente. Por favor, reintenta en unos segundos.");
+    }
+    throw new Error(`Error Estratégico: ${error.message}`);
   }
 };
