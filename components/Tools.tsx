@@ -1,8 +1,8 @@
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { generateMarketingCopy, respondToReview, analyzeBusinessIdea } from '../services/aiService';
 import { generateProfessionalPDF } from '../services/pdfService';
-import { MarketingOptions, MarketingVariant } from '../types';
+import { MarketingOptions, MarketingVariant, GroundedAnalysis } from '../types';
 
 const LOADING_MESSAGES = [
   "Iniciando motor de IA...",
@@ -10,6 +10,14 @@ const LOADING_MESSAGES = [
   "Escaneando tendencias de mercado...",
   "Redactando propuestas creativas...",
   "Casi listo..."
+];
+
+const SEARCH_LOADING_MESSAGES = [
+  "Accediendo a la red global...",
+  "Consultando fuentes de mercado...",
+  "Identificando competidores reales...",
+  "Sintetizando informe de viabilidad...",
+  "Aplicando razonamiento Gemini 3 Pro..."
 ];
 
 export const MarketingTool = () => {
@@ -108,6 +116,8 @@ export const MarketingTool = () => {
                 <option>Instagram</option>
                 <option>Facebook Ads</option>
                 <option>TikTok</option>
+                <option>Twitter (X)</option>
+                <option>Google Ads</option>
               </select>
             </div>
             <div>
@@ -273,18 +283,29 @@ export const ReviewTool = () => {
 
 export const AnalysisTool = () => {
   const [idea, setIdea] = useState('');
-  const [result, setResult] = useState('');
+  const [analysis, setAnalysis] = useState<GroundedAnalysis | null>(null);
   const [loading, setLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let interval: any;
+    if (loading) {
+      interval = setInterval(() => {
+        setLoadingStep(prev => (prev + 1) % SEARCH_LOADING_MESSAGES.length);
+      }, 3000);
+    }
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const handleAnalyze = async () => {
     if (!idea) return;
     setLoading(true);
     setError(null);
-    setResult('');
+    setAnalysis(null);
     try {
       const data = await analyzeBusinessIdea(idea);
-      setResult(data);
+      setAnalysis(data);
     } catch (e: any) {
       setError(e.message || "Error en el razonamiento estratégico.");
     } finally {
@@ -293,50 +314,82 @@ export const AnalysisTool = () => {
   };
 
   return (
-    <div className="animate-fadeIn">
+    <div className="animate-fadeIn pb-20">
       <div className="max-w-4xl mx-auto bg-white p-10 rounded-[2.5rem] shadow-sm border border-slate-200">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-1.5 h-8 bg-amber-500 rounded-full"></div>
-          <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Consultoría Estratégica Senior</h2>
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-1.5 h-8 bg-amber-500 rounded-full"></div>
+            <h2 className="text-lg font-bold text-slate-900 uppercase tracking-tight">Investigación Estratégica Senior</h2>
+          </div>
+          <div className="px-3 py-1 bg-amber-50 rounded-lg text-[9px] font-black text-amber-600 uppercase border border-amber-100">
+            Engine: Gemini 3 Pro + Google Search
+          </div>
         </div>
         <div className="space-y-8">
           {error && <div className="p-4 bg-red-50 text-red-600 text-[10px] font-bold uppercase rounded-xl border border-red-100">{error}</div>}
           <textarea 
             rows={5}
             className="w-full p-6 bg-slate-50 border border-slate-200 rounded-3xl text-sm leading-relaxed outline-none focus:ring-2 focus:ring-amber-100 transition" 
-            placeholder="Describa su idea de negocio, problema operativo o cambio estratégico para que el sistema realice una auditoría..."
+            placeholder="Describa su idea de negocio o reto estratégico. El sistema realizará una búsqueda en internet para validar datos reales..."
             value={idea}
             onChange={(e) => setIdea(e.target.value)}
           />
           <button 
             onClick={handleAnalyze}
             disabled={loading}
-            className="w-full bg-slate-900 text-white py-5 rounded-3xl font-bold uppercase text-[11px] tracking-widest hover:bg-amber-600 transition shadow-xl shadow-slate-200 disabled:opacity-50"
+            className={`w-full text-white py-5 rounded-3xl font-bold uppercase text-[11px] tracking-widest transition-all shadow-xl disabled:opacity-50 ${
+              loading ? 'bg-amber-100 text-amber-600 shadow-none' : 'bg-slate-900 hover:bg-amber-600 shadow-slate-200'
+            }`}
           >
-            {loading ? 'Razonando Análisis (Gemini Flash)...' : 'Ejecutar Auditoría Avanzada'}
+            {loading ? SEARCH_LOADING_MESSAGES[loadingStep] : 'Ejecutar Auditoría con Datos Reales'}
           </button>
         </div>
 
-        {result && (
-          <div className="mt-12 animate-fadeIn space-y-8 border-t border-slate-100 pt-12">
+        {analysis && (
+          <div className="mt-12 animate-fadeIn space-y-12 border-t border-slate-100 pt-12">
             <div className="max-w-none">
-              {result.split('\n').map((line, i) => {
+              {analysis.text.split('\n').map((line, i) => {
                 const trimmed = line.trim();
                 if (!trimmed) return <div key={i} className="h-4"></div>;
                 
-                // Limpieza de caracteres de Markdown (* o #)
                 const cleanLine = trimmed.replace(/[*#]/g, '');
-                
-                // Detectar encabezados (ej: "1. Diagnóstico" o texto en mayúsculas)
                 const isHeader = /^\d+\./.test(cleanLine) || (cleanLine.toUpperCase() === cleanLine && cleanLine.length > 5);
                 
                 return (
-                  <div key={i} className={`${isHeader ? 'font-black text-slate-900 uppercase tracking-wider text-xs mt-8 mb-4 border-l-4 border-amber-400 pl-4' : 'text-slate-600 text-sm leading-relaxed mb-2 pl-5'}`}>
+                  <div key={i} className={`${isHeader ? 'font-black text-slate-900 uppercase tracking-wider text-xs mt-10 mb-5 border-l-4 border-amber-400 pl-4' : 'text-slate-600 text-sm leading-relaxed mb-2 pl-5'}`}>
                     {cleanLine}
                   </div>
                 );
               })}
             </div>
+
+            {analysis.sources.length > 0 && (
+              <div className="bg-slate-50 p-8 rounded-[2rem] border border-slate-100">
+                <div className="flex items-center gap-2 mb-6">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                  <h4 className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Fuentes e Información Consultada</h4>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {analysis.sources.map((source, idx) => (
+                    <a 
+                      key={idx} 
+                      href={source.uri} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="group bg-white p-4 rounded-2xl border border-slate-200 hover:border-amber-300 transition-all flex items-center gap-4"
+                    >
+                      <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-amber-50 group-hover:text-amber-500 transition-colors">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                      </div>
+                      <div className="flex-1 overflow-hidden">
+                        <p className="text-[11px] font-bold text-slate-800 truncate group-hover:text-amber-600">{source.title}</p>
+                        <p className="text-[9px] text-slate-400 truncate mt-0.5">{new URL(source.uri).hostname}</p>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
